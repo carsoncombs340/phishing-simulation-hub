@@ -1,12 +1,12 @@
-// server.js - Final version with open CORS (fixes login on Vercel)
+// server.js - Final version with open CORS for Vercel
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 
-// Open CORS - allows localhost and Vercel
+// Open CORS - allows Vercel, localhost, and everything
 app.use(cors({
-  origin: '*',   // Allows all domains (including Vercel and localhost)
+  origin: '*', 
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
@@ -25,7 +25,7 @@ let templates = [
   { id: 8, title: "Urgent: Your Account Has Been Hacked", content: "Click here to reset your password immediately or lose access.", technique: "Email spoofing" }
 ];
 
-// In-memory progress storage
+// In-memory progress
 let progressData = [];
 
 // Routes
@@ -33,9 +33,10 @@ app.get('/', (req, res) => res.send('Backend server for Phishing Simulation Hub 
 
 app.get('/api/simulate', (req, res) => res.json(templates));
 
-app.post('/api/send-mock-email', (req, res) => res.json({ message: 'Mock email sent successfully' }));
+app.post('/api/send-mock-email', (req, res) => {
+  res.json({ message: 'Mock email sent successfully' });
+});
 
-// Save progress
 app.post('/api/progress', (req, res) => {
   const entry = {
     userId: req.body.userId,
@@ -49,20 +50,10 @@ app.post('/api/progress', (req, res) => {
   res.json({ message: 'Progress saved' });
 });
 
-// Return real progress for dashboard
 app.get('/api/progress', (req, res) => {
   const userId = req.query.userId;
   const userProgress = progressData.filter(p => p.userId === userId);
   res.json(userProgress);
-});
-
-// Login / Register (simple version)
-app.post('/api/login', (req, res) => {
-  res.json({ username: req.body.username });
-});
-
-app.post('/api/register', (req, res) => {
-  res.json({ message: 'Account created', username: req.body.username });
 });
 
 const PORT = process.env.PORT || 3001;

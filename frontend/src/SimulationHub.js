@@ -1,64 +1,63 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function SimulationHub() {
-  const [templates, setTemplates] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [feedback, setFeedback] = useState('');
   const navigate = useNavigate();
 
   const username = localStorage.getItem('username') || 'guest';
 
-  useEffect(() => {
-    fetch('http://localhost:3001/api/simulate')
-      .then(res => res.json())
-      .then(data => {
-        setTemplates(data);
-        if (data.length > 0) setCurrentIndex(0);
-      })
-      .catch(err => console.error('Error:', err));
-  }, []);
+  // Hardcoded templates - keeps simulations loading reliably
+  const templates = [
+    { id: 1, title: "Account Security Alert", content: "Your account has been locked. Click here to verify your identity immediately.", technique: "Urgency + Fear" },
+    { id: 2, title: "Package Delivery Notice", content: "Your package is on hold. Click to pay the $1.99 fee and schedule delivery.", technique: "Fake Authority" },
+    { id: 3, title: "Password Reset Request", content: "Someone tried to log into your account. Reset your password now.", technique: "Phishing Link" },
+    { id: 4, title: "Bank Account Verification", content: "Unusual activity detected. Please verify your banking details.", technique: "Spoofed Sender" }
+  ];
 
   const currentTemplate = templates[currentIndex];
 
-  const handleDecision = (choice) => {
+  const handleDecision = async (choice) => {
     if (!currentTemplate) return;
 
     let message = '';
-    if (choice === 'click') message = '❌ You clicked a suspicious link!';
-    else if (choice === 'delete') message = '✅ Good choice! Email deleted safely.';
-    else if (choice === 'report') message = '✅ Excellent! Reported as phishing.';
+    let score = 0;
+
+    if (choice === 'click') {
+      message = '❌ You clicked a suspicious link!';
+      score = 0;
+    } else if (choice === 'delete') {
+      message = '✅ Good choice! Email deleted safely.';
+      score = 70;
+    } else if (choice === 'report') {
+      message = '✅ Excellent! Reported as phishing.';
+      score = 100;
+    }
 
     setFeedback(message);
 
-    fetch('http://localhost:3001/api/progress', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: username,
-        simulationId: currentTemplate._id,
-        score: choice === 'click' ? 20 : 90,
-        feedback: message
-      })
-    });
-  };
-
-  const sendMockEmail = async () => {
-    if (!currentTemplate) return;
+    // Save progress to backend
     try {
-      await fetch('http://localhost:3001/api/send-mock-email', {
+      await fetch('https://astonishing-adaptation-production-9161.up.railway.app/api/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: currentTemplate.title,
-          content: currentTemplate.content,
-          subject: 'Urgent: Account Security Alert'
+          userId: username,
+          templateId: currentTemplate.id,
+          score: score,
+          decision: choice,
+          feedback: message
         })
       });
-      alert('✅ Mock email sent! Check your Gmail inbox.');
+      console.log('✅ Progress saved to dashboard');
     } catch (err) {
-      alert('Failed to send email.');
+      console.error('Could not save progress:', err);
     }
+  };
+
+  const sendMockEmail = () => {
+    alert('✅ Mock email sent! (simulated - we will fix real email later)');
   };
 
   const nextSimulation = () => {
@@ -66,21 +65,13 @@ function SimulationHub() {
     setCurrentIndex((currentIndex + 1) % templates.length);
   };
 
-  if (templates.length === 0) return <p>Loading simulations...</p>;
-
   return (
     <div style={{ padding: '20px', maxWidth: '700px', margin: '0 auto' }}>
       <h1>🛡️ Phishing Simulation Hub</h1>
       <p style={{ color: '#666' }}>Logged in as: <strong>{username}</strong></p>
       <p style={{ color: '#666' }}>Simulation {currentIndex + 1} of {templates.length}</p>
       
-      <div style={{
-        border: '2px solid #ddd',
-        borderRadius: '10px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-        marginBottom: '20px'
-      }}>
+      <div style={{ border: '2px solid #ddd', borderRadius: '10px', padding: '20px', backgroundColor: '#f9f9f9', marginBottom: '20px' }}>
         <h2>{currentTemplate.title}</h2>
         <p><strong>From:</strong> support@bank.com</p>
         <hr />
@@ -98,13 +89,7 @@ function SimulationHub() {
       <button onClick={() => handleDecision('report')} style={{ margin: '5px', padding: '10px 20px' }}>Report as phishing</button>
 
       {feedback && (
-        <div style={{
-          marginTop: '20px',
-          padding: '15px',
-          backgroundColor: feedback.includes('✅') ? '#d4edda' : '#f8d7da',
-          borderRadius: '8px',
-          fontWeight: 'bold'
-        }}>
+        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: feedback.includes('✅') ? '#d4edda' : '#f8d7da', borderRadius: '8px', fontWeight: 'bold' }}>
           {feedback}
         </div>
       )}

@@ -1,19 +1,19 @@
-// server.js - Final version with open CORS for Vercel
+// server.js - Final version with open CORS + email logging
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 
-// Open CORS - allows Vercel, localhost, and everything
+// Completely open CORS (fixes Vercel + localhost)
 app.use(cors({
-  origin: '*', 
+  origin: '*',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
 
 app.use(express.json());
 
-// In-memory templates (8 simulations)
+// In-memory templates
 let templates = [
   { id: 1, title: "Account Security Alert", content: "Your account has been locked. Click here to verify your identity immediately.", technique: "Urgency + Fear" },
   { id: 2, title: "Package Delivery Notice", content: "Your package is on hold. Click to pay the $1.99 fee and schedule delivery.", technique: "Fake Authority" },
@@ -25,35 +25,37 @@ let templates = [
   { id: 8, title: "Urgent: Your Account Has Been Hacked", content: "Click here to reset your password immediately or lose access.", technique: "Email spoofing" }
 ];
 
-// In-memory progress
-let progressData = [];
-
-// Routes
 app.get('/', (req, res) => res.send('Backend server for Phishing Simulation Hub is running!'));
 
 app.get('/api/simulate', (req, res) => res.json(templates));
 
-app.post('/api/send-mock-email', (req, res) => {
-  res.json({ message: 'Mock email sent successfully' });
-});
+// Real email route with logging
+app.post('/api/send-mock-email', async (req, res) => {
+  console.log('📧 Email route called with:', req.body);
+  const { title, content, subject } = req.body;
 
-app.post('/api/progress', (req, res) => {
-  const entry = {
-    userId: req.body.userId,
-    templateId: req.body.templateId,
-    score: req.body.score,
-    decision: req.body.decision,
-    feedback: req.body.feedback,
-    timestamp: new Date()
-  };
-  progressData.push(entry);
-  res.json({ message: 'Progress saved' });
-});
+  try {
+    const transporter = require('nodemailer').createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD
+      }
+    });
 
-app.get('/api/progress', (req, res) => {
-  const userId = req.query.userId;
-  const userProgress = progressData.filter(p => p.userId === userId);
-  res.json(userProgress);
+    await transporter.sendMail({
+      from: `"Phishing Simulation Hub" <${process.env.GMAIL_USER}>`,
+      to: process.env.GMAIL_USER,
+      subject: subject || title,
+      html: `<h2>${title}</h2><p>${content}</p><hr><p><em>This is a simulation email for educational purposes.</em></p>`
+    });
+
+    console.log('✅ Email sent successfully');
+    res.json({ message: 'Mock email sent successfully' });
+  } catch (error) {
+    console.error('❌ Email error:', error);
+    res.status(500).json({ message: error.message });
+  }
 });
 
 const PORT = process.env.PORT || 3001;

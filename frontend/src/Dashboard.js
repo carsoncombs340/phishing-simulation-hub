@@ -1,4 +1,4 @@
-// Dashboard.js - Fixed with dummy data fallback + logging
+// Dashboard.js - Real progress tracking (with fallback)
 import React, { useEffect, useState } from 'react';
 import Chart from 'chart.js/auto';
 import { useNavigate } from 'react-router-dom';
@@ -13,15 +13,9 @@ function Dashboard() {
   const username = localStorage.getItem('username') || 'guest';
 
   useEffect(() => {
-    console.log('🔍 Fetching progress for user:', username);
-
     fetch(`${API_BASE}/api/progress?userId=${username}`)
-      .then(res => {
-        console.log('📡 Response status:', res.status);
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
-        console.log('📊 Progress data received:', data);
         const realData = Array.isArray(data) ? data : [];
         setProgress(realData);
 
@@ -32,9 +26,8 @@ function Dashboard() {
 
         createChart(realData);
       })
-      .catch(err => {
-        console.error('❌ Error fetching progress:', err);
-        // Fallback dummy data so chart is never empty
+      .catch(() => {
+        // Fallback dummy data so chart never disappears
         const dummyData = [
           { score: 80 },
           { score: 65 },

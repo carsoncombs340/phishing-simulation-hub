@@ -1,11 +1,19 @@
-// db.js - Local MongoDB Connection
+// db.js - MongoDB Atlas Cloud Connection for Railway
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://127.0.0.1:27017/phishingDB');
+    // Use the environment variable that you set in Railway
+    const mongoURI = process.env.MONGODB_URI;
 
-    console.log('✅ Connected to Local MongoDB');
+    if (!mongoURI) {
+      console.error('❌ No MONGODB_URI found in environment variables');
+      process.exit(1);
+    }
+
+    await mongoose.connect(mongoURI);
+
+    console.log('✅ Successfully connected to MongoDB Atlas (Cloud)');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
     process.exit(1);

@@ -1,10 +1,10 @@
-// server.js - Fixed CORS + Real Progress Tracking
+// server.js - Final stable version with fixed CORS
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 
-// Fixed CORS - allows localhost and your Vercel site
+// Fixed CORS - allows localhost and Vercel
 app.use(cors({
   origin: [
     'http://localhost:3000',
@@ -32,6 +32,7 @@ let templates = [
 // In-memory progress storage
 let progressData = [];
 
+// Routes
 app.get('/', (req, res) => res.send('Backend server for Phishing Simulation Hub is running!'));
 
 app.get('/api/simulate', (req, res) => res.json(templates));
@@ -40,7 +41,7 @@ app.post('/api/send-mock-email', (req, res) => {
   res.json({ message: 'Mock email sent successfully' });
 });
 
-// Save progress when you make a decision
+// Save progress
 app.post('/api/progress', (req, res) => {
   const entry = {
     userId: req.body.userId,
@@ -55,7 +56,7 @@ app.post('/api/progress', (req, res) => {
   res.json({ message: 'Progress saved' });
 });
 
-// Return real progress for the dashboard
+// Return real progress for dashboard
 app.get('/api/progress', (req, res) => {
   const userId = req.query.userId;
   const userProgress = progressData.filter(p => p.userId === userId);

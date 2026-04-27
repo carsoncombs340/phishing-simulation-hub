@@ -41,20 +41,21 @@ function SimulationHub() {
 
     setFeedback(message);
 
+    // Save progress to localStorage (this is what the dashboard reads)
     try {
-      await fetch('https://astonishing-adaptation-production-9161.up.railway.app/api/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: username,
-          templateId: currentTemplate.id,
-          score: score,
-          decision: choice,
-          feedback: message
-        })
+      let savedProgress = JSON.parse(localStorage.getItem('progressData') || '[]');
+      savedProgress.push({
+        userId: username,
+        templateId: currentTemplate.id,
+        score: score,
+        decision: choice,
+        feedback: message,
+        timestamp: new Date()
       });
+      localStorage.setItem('progressData', JSON.stringify(savedProgress));
+      console.log('✅ Progress saved to localStorage');
     } catch (err) {
-      console.error('Could not save progress');
+      console.error('Could not save progress:', err);
     }
   };
 

@@ -1,9 +1,7 @@
-// Dashboard.js - Real progress tracking (with fallback)
+// Dashboard.js - Simple localStorage version (no backend fetch)
 import React, { useEffect, useState } from 'react';
 import Chart from 'chart.js/auto';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE = 'https://astonishing-adaptation-production-9161.up.railway.app';
 
 function Dashboard() {
   const [progress, setProgress] = useState([]);
@@ -13,32 +11,17 @@ function Dashboard() {
   const username = localStorage.getItem('username') || 'guest';
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/progress?userId=${username}`)
-      .then(res => res.json())
-      .then(data => {
-        const realData = Array.isArray(data) ? data : [];
-        setProgress(realData);
+    // Load progress from localStorage
+    const savedProgress = JSON.parse(localStorage.getItem('progressData') || '[]');
+    setProgress(savedProgress);
 
-        if (realData.length > 0) {
-          const avg = realData.reduce((sum, item) => sum + (item.score || 0), 0) / realData.length;
-          setSuccessRate(Math.round(avg));
-        }
+    if (savedProgress.length > 0) {
+      const avg = savedProgress.reduce((sum, item) => sum + (item.score || 0), 0) / savedProgress.length;
+      setSuccessRate(Math.round(avg));
+    }
 
-        createChart(realData);
-      })
-      .catch(() => {
-        // Fallback dummy data so chart never disappears
-        const dummyData = [
-          { score: 80 },
-          { score: 65 },
-          { score: 90 },
-          { score: 75 }
-        ];
-        setProgress(dummyData);
-        setSuccessRate(78);
-        createChart(dummyData);
-      });
-  }, [username]);
+    createChart(savedProgress);
+  }, []);
 
   const createChart = (data) => {
     const oldChart = Chart.getChart('scoreChart');
@@ -49,10 +32,10 @@ function Dashboard() {
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: data.length > 0 ? data.map((_, i) => `Sim ${i + 1}`) : ['Sim 1', 'Sim 2', 'Sim 3', 'Sim 4'],
+        labels: data.length > 0 ? data.map((_, i) => `Sim ${i + 1}`) : ['No data yet'],
         datasets: [{
           label: 'Score (%)',
-          data: data.length > 0 ? data.map(item => item.score || 0) : [80, 65, 90, 75],
+          data: data.length > 0 ? data.map(item => item.score || 0) : [0],
           backgroundColor: '#4CAF50'
         }]
       },

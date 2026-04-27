@@ -1,16 +1,10 @@
-// server.js - Stable version (simulations working again)
+// server.js - Stable version that worked before Gmail changes
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./db');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Connect to MongoDB
-connectDB().then(() => {
-  console.log('✅ MongoDB connected - Server ready');
-});
 
 // In-memory templates (this is what made simulations load before)
 let templates = [
@@ -35,7 +29,6 @@ app.post('/api/simulate', (req, res) => {
   res.json(newTemplate);
 });
 
-// Simple email route (won't crash the server)
 app.post('/api/send-mock-email', (req, res) => {
   res.json({ message: 'Mock email sent successfully (simulated)' });
 });

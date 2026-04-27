@@ -1,48 +1,27 @@
-// Login.js
-// Handles user login and registration
-
+// Login.js - LocalStorage version (no backend call)
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE = 'https://astonishing-adaptation-production-9161.up.railway.app';
 
 function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    const url = isLogin ? '/api/login' : '/api/register';
-    const body = isLogin ? { username, password } : { username, password, email };
-
-    try {
-      const res = await fetch(`${API_BASE}${url}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        if (isLogin) {
-          localStorage.setItem('username', data.username || username);
-          alert('Login successful!');
-          navigate('/');
-        } else {
-          setMessage('Account created! You can now log in.');
-          setIsLogin(true);
-        }
-      } else {
-        setMessage(data.message || 'Something went wrong');
-      }
-    } catch (err) {
-      setMessage('Could not connect to server.');
+    if (isLogin) {
+      // Fake login - just store username
+      localStorage.setItem('username', username);
+      alert('Login successful!');
+      navigate('/');
+    } else {
+      // Fake register
+      localStorage.setItem('username', username);
+      setMessage('Account created! You can now log in.');
+      setIsLogin(true);
     }
   };
 
@@ -51,12 +30,22 @@ function Login() {
       <h1 style={{ textAlign: 'center' }}>{isLogin ? 'Login' : 'Create Account'}</h1>
 
       <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} style={{ width: '100%', padding: '10px', margin: '10px 0' }} required />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: '100%', padding: '10px', margin: '10px 0' }} required />
-
-        {!isLogin && (
-          <input type="email" placeholder="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '10px', margin: '10px 0' }} />
-        )}
+        <input 
+          type="text" 
+          placeholder="Username" 
+          value={username} 
+          onChange={(e) => setUsername(e.target.value)} 
+          style={{ width: '100%', padding: '10px', margin: '10px 0' }} 
+          required 
+        />
+        <input 
+          type="password" 
+          placeholder="Password" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+          style={{ width: '100%', padding: '10px', margin: '10px 0' }} 
+          required 
+        />
 
         <button type="submit" style={{ width: '100%', padding: '12px', marginTop: '15px' }}>
           {isLogin ? 'Login' : 'Register'}
@@ -70,7 +59,7 @@ function Login() {
         </span>
       </p>
 
-      {message && <p style={{ textAlign: 'center', color: 'red', marginTop: '15px' }}>{message}</p>}
+      {message && <p style={{ textAlign: 'center', color: 'green', marginTop: '15px' }}>{message}</p>}
 
       <button onClick={() => navigate('/')} style={{ marginTop: '20px', width: '100%', padding: '10px' }}>
         ← Back to Simulation (as Guest)

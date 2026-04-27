@@ -1,11 +1,16 @@
-// server.js - Final version with open CORS + real progress
+// server.js - Final version with open CORS (fixes login on Vercel)
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 
-// Open CORS - allows all origins (localhost + Vercel)
-app.use(cors());
+// Open CORS - allows localhost and Vercel
+app.use(cors({
+  origin: '*',   // Allows all domains (including Vercel and localhost)
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
 // In-memory templates (8 simulations)
@@ -30,6 +35,7 @@ app.get('/api/simulate', (req, res) => res.json(templates));
 
 app.post('/api/send-mock-email', (req, res) => res.json({ message: 'Mock email sent successfully' }));
 
+// Save progress
 app.post('/api/progress', (req, res) => {
   const entry = {
     userId: req.body.userId,
@@ -40,14 +46,23 @@ app.post('/api/progress', (req, res) => {
     timestamp: new Date()
   };
   progressData.push(entry);
-  console.log('✅ Progress saved:', entry);
   res.json({ message: 'Progress saved' });
 });
 
+// Return real progress for dashboard
 app.get('/api/progress', (req, res) => {
   const userId = req.query.userId;
   const userProgress = progressData.filter(p => p.userId === userId);
   res.json(userProgress);
+});
+
+// Login / Register (simple version)
+app.post('/api/login', (req, res) => {
+  res.json({ username: req.body.username });
+});
+
+app.post('/api/register', (req, res) => {
+  res.json({ message: 'Account created', username: req.body.username });
 });
 
 const PORT = process.env.PORT || 3001;

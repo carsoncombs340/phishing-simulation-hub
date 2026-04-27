@@ -1,12 +1,12 @@
-// server.js - Full backend for Phishing Simulation Hub (Railway ready)
+// server.js - Full backend for Phishing Simulation Hub (Railway + Gmail)
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const connectDB = require('./db');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -57,6 +57,7 @@ app.get('/api/simulate', async (req, res) => {
     const templates = await PhishingTemplate.find();
     res.json(templates);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 });

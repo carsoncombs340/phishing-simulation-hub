@@ -1,4 +1,4 @@
-// server.js - Stable version (in-memory templates + working email)
+// server.js - Minimal stable version for Railway
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
@@ -13,7 +13,7 @@ connectDB().then(() => {
   console.log('✅ MongoDB connected - Server ready');
 });
 
-// In-memory templates (stable - no model crashes)
+// In-memory templates (stable - no model files)
 let templates = [
   { id: 1, title: "Account Security Alert", content: "Your account has been locked. Click here to verify your identity immediately.", technique: "Urgency + Fear" },
   { id: 2, title: "Package Delivery Notice", content: "Your package is on hold. Click to pay the $1.99 fee and schedule delivery.", technique: "Fake Authority" },
@@ -50,12 +50,6 @@ app.post('/api/send-mock-email', async (req, res) => {
 // Simulate Routes
 app.get('/api/simulate', (req, res) => {
   res.json(templates);
-});
-
-app.post('/api/simulate', (req, res) => {
-  const newTemplate = { id: templates.length + 1, ...req.body };
-  templates.push(newTemplate);
-  res.json(newTemplate);
 });
 
 app.get('/', (req, res) => {

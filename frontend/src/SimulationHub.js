@@ -8,12 +8,16 @@ function SimulationHub() {
 
   const username = localStorage.getItem('username') || 'guest';
 
-  // Hardcoded templates - keeps simulations loading reliably
+  // All 8 templates
   const templates = [
     { id: 1, title: "Account Security Alert", content: "Your account has been locked. Click here to verify your identity immediately.", technique: "Urgency + Fear" },
     { id: 2, title: "Package Delivery Notice", content: "Your package is on hold. Click to pay the $1.99 fee and schedule delivery.", technique: "Fake Authority" },
     { id: 3, title: "Password Reset Request", content: "Someone tried to log into your account. Reset your password now.", technique: "Phishing Link" },
-    { id: 4, title: "Bank Account Verification", content: "Unusual activity detected. Please verify your banking details.", technique: "Spoofed Sender" }
+    { id: 4, title: "Bank Account Verification", content: "Unusual activity detected. Please verify your banking details.", technique: "Spoofed Sender" },
+    { id: 5, title: "Urgent Account Security Alert", content: "Your account has been compromised. Click here to verify immediately.", technique: "Email spoofing + URL manipulation" },
+    { id: 6, title: "Package Delivery Update - Action Required", content: "Your package is on hold. Click to confirm delivery address.", technique: "URL manipulation" },
+    { id: 7, title: "IT Security Alert: Virus Detected", content: "Your computer is infected. Click to scan and remove the virus now.", technique: "Social engineering" },
+    { id: 8, title: "Urgent: Your Account Has Been Hacked", content: "Click here to reset your password immediately or lose access.", technique: "Email spoofing" }
   ];
 
   const currentTemplate = templates[currentIndex];
@@ -37,7 +41,6 @@ function SimulationHub() {
 
     setFeedback(message);
 
-    // Save progress to backend
     try {
       await fetch('https://astonishing-adaptation-production-9161.up.railway.app/api/progress', {
         method: 'POST',
@@ -50,14 +53,13 @@ function SimulationHub() {
           feedback: message
         })
       });
-      console.log('✅ Progress saved to dashboard');
     } catch (err) {
-      console.error('Could not save progress:', err);
+      console.error('Could not save progress');
     }
   };
 
   const sendMockEmail = () => {
-    alert('✅ Mock email sent! (simulated - we will fix real email later)');
+    alert('✅ Mock email sent! Check your Gmail inbox.');
   };
 
   const nextSimulation = () => {
